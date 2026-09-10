@@ -93,6 +93,19 @@
     86%{ transform:translate(118vw,8vh) rotate(6deg); }
     100%{ transform:translate(135vw,0) rotate(0deg); }
   }
+  /* ===== 蜜蜂图标：翅膀可独立扇动 ===== */
+  .bee-icon{ width:1em; height:1em; display:block; overflow:visible; }
+  .bee-wing{ transform-box:fill-box; }
+  .bee-wing-l{ transform-origin:88% 28%; animation:beeFlapL .16s ease-in-out infinite; }
+  .bee-wing-r{ transform-origin:12% 28%; animation:beeFlapR .16s ease-in-out infinite; }
+  @keyframes beeFlapL{
+    0%,100%{ transform:rotate(-8deg) scaleX(1); }
+    50%{ transform:rotate(22deg) scaleX(0.82); }
+  }
+  @keyframes beeFlapR{
+    0%,100%{ transform:rotate(8deg) scaleX(1); }
+    50%{ transform:rotate(-22deg) scaleX(0.82); }
+  }
   .screen{
     width:100%; max-width:720px;
     margin-top: 3%;
@@ -437,7 +450,29 @@
 <body>
 
 <div class="bg-deco" id="bgDeco"></div>
-<div class="flying-bee">🐝</div>
+<div class="flying-bee">
+  <svg class="bee-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g class="bee-wing bee-wing-l"><ellipse cx="34" cy="30" rx="16" ry="22" fill="#eaf6ff" fill-opacity="0.85" stroke="#bfe6ff" stroke-width="1.5"/></g>
+    <g class="bee-wing bee-wing-r"><ellipse cx="66" cy="30" rx="16" ry="22" fill="#eaf6ff" fill-opacity="0.85" stroke="#bfe6ff" stroke-width="1.5"/></g>
+    <g class="bee-body">
+      <path d="M50 82 L46 90 L54 90 Z" fill="#3b2a52"/>
+      <ellipse cx="50" cy="58" rx="26" ry="24" fill="#ffd23f" stroke="#3b2a52" stroke-width="3"/>
+      <path d="M25 50 Q50 58 75 50" stroke="#3b2a52" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M24 62 Q50 70 76 62" stroke="#3b2a52" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M40 36 Q34 20 26 16" stroke="#3b2a52" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M60 36 Q66 20 74 16" stroke="#3b2a52" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="26" cy="16" r="3.5" fill="#3b2a52"/>
+      <circle cx="74" cy="16" r="3.5" fill="#3b2a52"/>
+      <circle cx="40" cy="50" r="6" fill="#fff"/>
+      <circle cx="60" cy="50" r="6" fill="#fff"/>
+      <circle cx="41.5" cy="50" r="3" fill="#3b2a52"/>
+      <circle cx="61.5" cy="50" r="3" fill="#3b2a52"/>
+      <circle cx="32" cy="58" r="4" fill="#ff9fbf" fill-opacity="0.6"/>
+      <circle cx="68" cy="58" r="4" fill="#ff9fbf" fill-opacity="0.6"/>
+      <path d="M45 62 Q50 66 55 62" stroke="#3b2a52" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+  </svg>
+</div>
 <canvas id="confetti"></canvas>
 
 <div id="app">
@@ -446,7 +481,29 @@
 
   <!-- 首页 -->
   <div class="screen active" id="screen-home">
-    <div class="mascot">🐝</div>
+    <div class="mascot">
+      <svg class="bee-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g class="bee-wing bee-wing-l"><ellipse cx="34" cy="30" rx="16" ry="22" fill="#eaf6ff" fill-opacity="0.85" stroke="#bfe6ff" stroke-width="1.5"/></g>
+        <g class="bee-wing bee-wing-r"><ellipse cx="66" cy="30" rx="16" ry="22" fill="#eaf6ff" fill-opacity="0.85" stroke="#bfe6ff" stroke-width="1.5"/></g>
+        <g class="bee-body">
+          <path d="M50 82 L46 90 L54 90 Z" fill="#3b2a52"/>
+          <ellipse cx="50" cy="58" rx="26" ry="24" fill="#ffd23f" stroke="#3b2a52" stroke-width="3"/>
+          <path d="M25 50 Q50 58 75 50" stroke="#3b2a52" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M24 62 Q50 70 76 62" stroke="#3b2a52" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M40 36 Q34 20 26 16" stroke="#3b2a52" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M60 36 Q66 20 74 16" stroke="#3b2a52" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="26" cy="16" r="3.5" fill="#3b2a52"/>
+          <circle cx="74" cy="16" r="3.5" fill="#3b2a52"/>
+          <circle cx="40" cy="50" r="6" fill="#fff"/>
+          <circle cx="60" cy="50" r="6" fill="#fff"/>
+          <circle cx="41.5" cy="50" r="3" fill="#3b2a52"/>
+          <circle cx="61.5" cy="50" r="3" fill="#3b2a52"/>
+          <circle cx="32" cy="58" r="4" fill="#ff9fbf" fill-opacity="0.6"/>
+          <circle cx="68" cy="58" r="4" fill="#ff9fbf" fill-opacity="0.6"/>
+          <path d="M45 62 Q50 66 55 62" stroke="#3b2a52" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </div>
     <h1 class="title">乘法口诀大挑战</h1>
     <div class="subtitle">和小蜜蜂老师一起，闯关学乘法！</div>
     <div class="home-buttons">
