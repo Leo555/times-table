@@ -4,6 +4,23 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>乘法口诀大挑战</title>
+<meta name="description" content="适合小朋友使用的九九乘法口诀表与答题小游戏" />
+
+<!-- PWA / 添加到主屏幕 -->
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#ff6fa5" />
+
+<!-- iOS 添加到主屏幕 -->
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="九九乘法表" />
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+
+<!-- 图标 -->
+<link rel="icon" type="image/x-icon" href="./icons/favicon.ico" />
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png" />
 <style>
   :root{
     --pink:#ff6fa5;
@@ -175,13 +192,12 @@
   .cell{
     min-width:0;
     width:100%;
-    aspect-ratio:1/1;
-    padding:2px;
+    padding:8px 2px;
     display:flex;
-    flex-direction:row;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:1px;
+    gap:2px;
     text-align:center;
     border-radius:12px;
     font-weight:800;
@@ -190,26 +206,21 @@
     transition:transform .12s ease;
     overflow:hidden;
     touch-action:manipulation;
-    line-height:1;
+    line-height:1.1;
   }
   .cell .cell-expr,
   .cell .cell-ans{
-    font-size:clamp(6px,1.9vw,12px);
+    font-size:clamp(12px,3.6vw,17px);
     white-space:nowrap;
-    letter-spacing:-0.3px;
   }
-  .cell .cell-expr{ opacity:.85; }
+  .cell .cell-expr{ opacity:.88; }
   .cell:active{ transform:scale(0.92); }
 
-  /* ===== 平板/PC 大屏：格子不再随列宽被拉成大正方形，单行也更宽松 ===== */
+  /* ===== 平板/PC 大屏：格子更宽松，字号进一步放大 ===== */
   @media (min-width:600px){
-    .cell{
-      aspect-ratio:auto;
-      padding:10px 6px;
-      gap:4px;
-    }
+    .cell{ padding:12px 6px; gap:4px; }
     .cell .cell-expr,
-    .cell .cell-ans{ font-size:clamp(13px,1.3vw,18px); letter-spacing:0; }
+    .cell .cell-ans{ font-size:clamp(15px,1.6vw,20px); }
   }
 
   /* ===== 设置界面 ===== */
@@ -383,9 +394,9 @@
     .mascot{ font-size:52px; }
     .subtitle{ font-size:13px; margin-bottom:14px; }
     .times-grid{ gap:5px; }
-    .cell{ border-radius:9px; }
+    .cell{ border-radius:9px; padding:6px 2px; }
     .cell .cell-expr,
-    .cell .cell-ans{ font-size:clamp(6px,1.9vw,11px); }
+    .cell .cell-ans{ font-size:clamp(11px,3.3vw,15px); }
     .num-grid{ gap:7px; }
     .num-chip{ padding:11px 0; font-size:15px; border-radius:12px; }
     .choice-chip{ min-width:70px; padding:10px 6px; font-size:14px; }
@@ -399,9 +410,9 @@
   /* ===== 超小屏适配 (<=340px) ===== */
   @media (max-width:340px){
     .times-grid{ gap:3px; }
-    .cell{ border-radius:7px; }
+    .cell{ border-radius:7px; padding:5px 1px; }
     .cell .cell-expr,
-    .cell .cell-ans{ font-size:clamp(5px,1.7vw,9px); }
+    .cell .cell-ans{ font-size:clamp(9px,3vw,13px); }
     .num-grid{ gap:5px; }
     .num-chip{ font-size:13px; padding:9px 0; }
     .question-text{ font-size:clamp(30px,10vw,48px); }
@@ -996,6 +1007,13 @@ window.addEventListener('resize', ()=>{
 
 /* ==================== 初始化 ==================== */
 buildSetup();
+
+/* ==================== PWA: 注册 Service Worker ==================== */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
