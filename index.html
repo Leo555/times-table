@@ -216,9 +216,9 @@
   .cell .cell-expr{ opacity:.88; }
   .cell:active{ transform:scale(0.92); }
 
-  /* ===== 平板/PC 大屏：格子更宽松，字号进一步放大 ===== */
+  /* ===== 平板/PC 大屏：格子更宽松，单行不换行，字号进一步放大 ===== */
   @media (min-width:600px){
-    .cell{ padding:12px 6px; gap:4px; }
+    .cell{ flex-direction:row; padding:12px 6px; gap:4px; }
     .cell .cell-expr,
     .cell .cell-ans{ font-size:clamp(15px,1.6vw,20px); }
   }
