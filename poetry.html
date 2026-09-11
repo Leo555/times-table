@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>古诗大挑战</title>
+<meta name="description" content="人教版（统编版）1-3年级必背古诗，可逐首查看，也可按年级随机抽背" />
+<meta name="theme-color" content="#ff6fa5" />
+<style>
+  :root{
+    --pink:#ff6fa5;
+    --orange:#ffa73b;
+    --yellow:#ffd23f;
+    --green:#3ddc97;
+    --blue:#4fc3f7;
+    --purple:#a78bfa;
+    --red:#ff5c5c;
+    --ink:#3b2a52;
+    --card:#ffffff;
+    --bg1:#fff4e0;
+    --bg2:#dff6ff;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family:"PingFang SC","Microsoft YaHei","Heiti SC",-apple-system,BlinkMacSystemFont,sans-serif;
+    background:linear-gradient(160deg,var(--bg1) 0%, var(--bg2) 100%);
+    color:var(--ink);
+    overflow-x:hidden;
+    user-select:none;
+  }
+  #app{
+    min-height:100vh; min-height:100dvh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:16px;
+    padding-top:max(16px, env(safe-area-inset-top));
+    padding-bottom:max(16px, env(safe-area-inset-bottom));
+    padding-left:max(16px, env(safe-area-inset-left));
+    padding-right:max(16px, env(safe-area-inset-right));
+    position:relative;
+  }
+  #app.has-fab{ padding-top:calc(64px + env(safe-area-inset-top)); }
+
+  .bg-deco{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .bg-deco span{ position:absolute; font-size:32px; opacity:.32; animation:floaty 9s ease-in-out infinite; }
+  @keyframes floaty{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%{ transform:translateY(-24px) rotate(10deg); }
+  }
+
+  .screen{
+    width:100%; max-width:720px; margin-top:3%;
+    display:none; flex-direction:column; align-items:center;
+    z-index:1; animation:fadeIn .35s ease;
+  }
+  .screen.active{ display:flex; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  h1.title{
+    font-size:clamp(26px,7vw,42px);
+    margin:6px 0 2px;
+    background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-align:center; font-weight:900;
+    text-shadow:0 2px 0 rgba(0,0,0,0.04);
+  }
+  .subtitle{ color:#8b7aa8; font-size:15px; margin-bottom:18px; text-align:center; }
+  .mascot{ font-size:60px; animation:bounce 2.4s ease-in-out infinite; margin-bottom:4px; }
+  @keyframes bounce{
+    0%,100%{ transform:translateY(0) rotate(-4deg); }
+    50%{ transform:translateY(-12px) rotate(4deg); }
+  }
+
+  .card{
+    background:var(--card); border-radius:24px; padding:20px; width:100%;
+    box-shadow:0 10px 26px rgba(120,90,180,0.15); margin-bottom:16px;
+  }
+  .big-btn{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:18px 14px; font-size:22px; font-weight:800; color:#fff;
+    border:none; border-radius:20px; cursor:pointer; margin-bottom:14px;
+    box-shadow:0 8px 0 rgba(0,0,0,0.12);
+    transition:transform .08s ease, box-shadow .08s ease;
+    touch-action:manipulation;
+  }
+  .big-btn:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,0.12); }
+  .btn-pink{ background:linear-gradient(135deg,#ff8fb1,var(--pink)); }
+  .btn-blue{ background:linear-gradient(135deg,#7fd8ff,var(--blue)); }
+  .btn-green{ background:linear-gradient(135deg,#7bf0c2,var(--green)); }
+  .btn-purple{ background:linear-gradient(135deg,#c7b3ff,var(--purple)); }
+  .btn-orange{ background:linear-gradient(135deg,#ffc773,var(--orange)); }
+  .btn-small{
+    padding:10px 18px; font-size:15px; border-radius:14px;
+    box-shadow:0 5px 0 rgba(0,0,0,0.12); width:auto; margin:0;
+  }
+  .home-buttons{ width:100%; max-width:420px; }
+
+  /* 年级筛选 chip */
+  .chip-row{ display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; width:100%; justify-content:center; }
+  .grade-chip{
+    padding:10px 18px; text-align:center; border-radius:16px;
+    font-size:15px; font-weight:800; cursor:pointer;
+    background:#f1eafe; color:#8b7aa8; border:3px solid transparent;
+    transition:all .15s ease; touch-action:manipulation;
+  }
+  .grade-chip.selected{
+    background:linear-gradient(135deg,#c7b3ff,var(--purple));
+    color:#fff; border-color:#8b6bd6; transform:scale(1.05);
+  }
+
+  /* 古诗列表 */
+  .poem-list{ width:100%; }
+  .poem-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:#f8f5ff; border-radius:16px; padding:14px 16px; margin-bottom:10px;
+    cursor:pointer; transition:transform .1s ease; touch-action:manipulation;
+  }
+  .poem-item:active{ transform:scale(0.97); }
+  .poem-item .pi-main{ flex:1; min-width:0; }
+  .poem-item .pi-title{ font-size:17px; font-weight:800; color:var(--ink); }
+  .poem-item .pi-first{ font-size:13px; color:#8b7aa8; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .poem-item .pi-grade{
+    font-size:12px; font-weight:800; color:#fff; padding:4px 10px; border-radius:12px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--orange),var(--yellow));
+  }
+  .empty-tip{ color:#b3a8cc; text-align:center; padding:30px 0; font-size:15px; }
+
+  /* 古诗详情卡片 */
+  .poem-card{
+    background:#fff; border-radius:28px; padding:32px 22px; width:100%;
+    text-align:center; box-shadow:0 12px 30px rgba(120,90,180,0.18); margin-bottom:18px;
+  }
+  .poem-card .pc-title{ font-size:clamp(24px,6vw,32px); font-weight:900; color:var(--ink); margin-bottom:6px; }
+  .poem-card .pc-author{ font-size:15px; color:#8b7aa8; font-weight:700; margin-bottom:20px; }
+  .poem-card .pc-line{
+    font-size:clamp(20px,5.2vw,28px); font-weight:800; color:var(--ink);
+    line-height:2; letter-spacing:1px;
+  }
+  .poem-tag{
+    display:inline-block; margin-top:16px; font-size:13px; font-weight:800; color:#fff;
+    padding:5px 14px; border-radius:14px; background:linear-gradient(135deg,var(--green),var(--blue));
+  }
+
+  .action-row{ display:flex; gap:12px; width:100%; }
+  .action-row .big-btn{ flex:1; }
+
+  /* 抽背进度 */
+  .quiz-top{
+    width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+    font-weight:800; font-size:15px; color:#8b7aa8;
+  }
+  .progress-bar{ width:100%; height:14px; background:#f1eafe; border-radius:10px; overflow:hidden; margin-bottom:18px; }
+  .progress-fill{
+    height:100%; background:linear-gradient(90deg,var(--green),var(--blue));
+    width:0%; transition:width .3s ease; border-radius:10px;
+  }
+
+  .reveal-hint{ font-size:15px; color:#8b7aa8; margin-top:6px; }
+
+  /* 结算 */
+  .stat-row{ display:flex; justify-content:space-around; width:100%; margin-bottom:6px; }
+  .stat-item{ text-align:center; }
+  .stat-num{ font-size:28px; font-weight:900; color:var(--pink); }
+  .stat-label{ font-size:13px; color:#8b7aa8; font-weight:700; }
+  .result-msg{ font-size:20px; font-weight:800; margin:6px 0 18px; text-align:center; }
+  .redo-list{ width:100%; text-align:left; }
+  .redo-item{
+    background:#fff7f0; border-radius:12px; padding:8px 14px; margin-bottom:6px;
+    font-size:15px; font-weight:700; color:#a45; display:flex; justify-content:space-between;
+  }
+  .section-label{ font-weight:800; font-size:16px; margin:6px 0 10px; color:var(--ink); }
+
+  .back-fab{
+    position:fixed; top:max(14px, env(safe-area-inset-top)); left:max(14px, env(safe-area-inset-left));
+    z-index:5; background:#fff; border:none; border-radius:50%;
+    width:44px; height:44px; font-size:20px; cursor:pointer;
+    box-shadow:0 6px 14px rgba(120,90,180,0.2); touch-action:manipulation;
+  }
+  .speak-fab{
+    position:fixed; top:max(14px, env(safe-area-inset-top)); right:max(14px, env(safe-area-inset-right));
+    z-index:5; background:#fff; border:none; border-radius:50%;
+    width:44px; height:44px; font-size:20px; cursor:pointer;
+    box-shadow:0 6px 14px rgba(120,90,180,0.2); touch-action:manipulation;
+  }
+
+  @media (max-width:480px){
+    .card{ padding:16px; border-radius:20px; }
+    .mascot{ font-size:50px; }
+    .poem-card{ padding:24px 16px; }
+    .big-btn{ padding:15px 10px; font-size:19px; border-radius:16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-deco" id="bgDeco"></div>
+
+<div id="app">
+  <button class="back-fab" id="backFab" style="display:none;" onclick="goHome()">🏠</button>
+  <button class="speak-fab" id="speakFab" style="display:none;" onclick="speakCurrentPoem()">🔊</button>
+
+  <!-- 首页 -->
+  <div class="screen active" id="screen-home">
+    <div class="mascot">📜</div>
+    <h1 class="title">古诗大挑战</h1>
+    <div class="subtitle">人教版 1～3 年级必背古诗，边读边背，天天进步！</div>
+    <div class="home-buttons">
+      <button class="big-btn btn-blue" onclick="showList()">📖 古诗大全</button>
+      <button class="big-btn btn-pink" onclick="showReciteSetup()">🎯 开始抽背</button>
+      <button class="big-btn btn-purple" onclick="location.href='index.html'">✖️ 乘法口诀表</button>
+    </div>
+  </div>
+
+  <!-- 古诗列表 -->
+  <div class="screen" id="screen-list">
+    <h1 class="title" style="font-size:26px;margin-bottom:10px;">📖 古诗大全</h1>
+    <div class="subtitle">点一点古诗，查看全文和朗读</div>
+    <div class="chip-row" id="listGradeChips"></div>
+    <div class="card">
+      <div class="poem-list" id="poemListBox"></div>
+    </div>
+  </div>
+
+  <!-- 古诗详情 -->
+  <div class="screen" id="screen-detail">
+    <div class="poem-card" id="detailCard"></div>
+    <button class="big-btn btn-purple" onclick="showList()">⬅️ 返回列表</button>
+  </div>
+
+  <!-- 抽背设置 -->
+  <div class="screen" id="screen-recite-setup">
+    <h1 class="title" style="font-size:26px;margin-bottom:10px;">🎯 抽背设置</h1>
+    <div class="card">
+      <div class="section-label">1️⃣ 选择要抽背的年级（可多选）</div>
+      <div class="chip-row" id="setupGradeChips"></div>
+
+      <div class="section-label">2️⃣ 抽背题数</div>
+      <div class="chip-row" id="setupCountChips"></div>
+    </div>
+    <button class="big-btn btn-orange" onclick="startRecite()">🚀 开始抽背！</button>
+  </div>
+
+  <!-- 抽背进行中 -->
+  <div class="screen" id="screen-recite-quiz">
+    <div class="quiz-top">
+      <span id="reciteProgressText">第 1/10 题</span>
+      <span id="reciteScoreText">背出 0 首</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="reciteProgressFill"></div></div>
+
+    <div class="poem-card" id="reciteCard"></div>
+
+    <div class="action-row" id="reciteActionRow"></div>
+  </div>
+
+  <!-- 抽背结算 -->
+  <div class="screen" id="screen-recite-result">
+    <div class="mascot" id="reciteResultMascot">🎉</div>
+    <h1 class="title" style="font-size:28px;">抽背完成！</h1>
+    <div class="result-msg" id="reciteResultMsg"></div>
+    <div class="card">
+      <div class="stat-row">
+        <div class="stat-item"><div class="stat-num" id="reciteStatOk">0</div><div class="stat-label">背出</div></div>
+        <div class="stat-item"><div class="stat-num" id="reciteStatTotal">0</div><div class="stat-label">总题数</div></div>
+        <div class="stat-item"><div class="stat-num" id="reciteStatRate">0%</div><div class="stat-label">达成率</div></div>
+      </div>
+      <div id="reciteRedoBox"></div>
+    </div>
+    <button class="big-btn btn-pink" onclick="showReciteSetup()">🔁 再来一次</button>
+    <button class="big-btn btn-blue" onclick="goHome()">🏠 返回首页</button>
+  </div>
+
+</div>
+
+<script>
+/* ==================== 基础工具 ==================== */
+const $ = (id)=>document.getElementById(id);
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  const showFab = (id!=='screen-home');
+  $('backFab').style.display = showFab ? 'block' : 'none';
+  const showSpeak = (id==='screen-detail' || id==='screen-recite-quiz');
+  $('speakFab').style.display = showSpeak ? 'block' : 'none';
+  $('app').classList.toggle('has-fab', showFab);
+  window.scrollTo(0,0);
+}
+function goHome(){ showScreen('screen-home'); }
+
+/* ==================== 背景装饰 ==================== */
+(function initDeco(){
+  const emojis = ['📚','✏️','🖌️','🌸','📖','🏮','🍃','⭐','🀄','🎋'];
+  const deco = $('bgDeco');
+  for(let i=0;i<10;i++){
+    const s = document.createElement('span');
+    s.textContent = emojis[i % emojis.length];
+    s.style.left = (Math.random()*94)+'vw';
+    s.style.top = (Math.random()*94)+'vh';
+    s.style.animationDelay = (Math.random()*4)+'s';
+    s.style.animationDuration = (7+Math.random()*5)+'s';
+    deco.appendChild(s);
+  }
+})();
+
+/* ==================== 语音朗读 ==================== */
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN';
+    u.rate = 0.85;
+    u.pitch = 1.05;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+let currentSpeakText = '';
+function speakCurrentPoem(){
+  if(currentSpeakText) speak(currentSpeakText);
+}
+
+/* ==================== 古诗数据（人教版/统编版 1-3 年级必背古诗） ==================== */
+const POEMS = [
+  { title:'咏鹅', author:'骆宾王', dynasty:'唐', grade:'一年级', term:'上册',
+    lines:['鹅，鹅，鹅，','曲项向天歌。','白毛浮绿水，','红掌拨清波。'] },
+
+  { title:'静夜思', author:'李白', dynasty:'唐', grade:'一年级', term:'下册',
+    lines:['床前明月光，','疑是地上霜。','举头望明月，','低头思故乡。'] },
+  { title:'池上', author:'白居易', dynasty:'唐', grade:'一年级', term:'下册',
+    lines:['小娃撑小艇，','偷采白莲回。','不解藏踪迹，','浮萍一道开。'] },
+  { title:'小池', author:'杨万里', dynasty:'宋', grade:'一年级', term:'下册',
+    lines:['泉眼无声惜细流，','树阴照水爱晴柔。','小荷才露尖尖角，','早有蜻蜓立上头。'] },
+
+  { title:'登鹳雀楼', author:'王之涣', dynasty:'唐', grade:'二年级', term:'上册',
+    lines:['白日依山尽，','黄河入海流。','欲穷千里目，','更上一层楼。'] },
+  { title:'望庐山瀑布', author:'李白', dynasty:'唐', grade:'二年级', term:'上册',
+    lines:['日照香炉生紫烟，','遥看瀑布挂前川。','飞流直下三千尺，','疑是银河落九天。'] },
+  { title:'夜宿山寺', author:'李白', dynasty:'唐', grade:'二年级', term:'上册',
+    lines:['危楼高百尺，','手可摘星辰。','不敢高声语，','恐惊天上人。'] },
+  { title:'敕勒歌', author:'北朝民歌', dynasty:'南北朝', grade:'二年级', term:'上册',
+    lines:['敕勒川，阴山下。','天似穹庐，笼盖四野。','天苍苍，野茫茫，','风吹草低见牛羊。'] },
+
+  { title:'村居', author:'高鼎', dynasty:'清', grade:'二年级', term:'下册',
+    lines:['草长莺飞二月天，','拂堤杨柳醉春烟。','儿童散学归来早，','忙趁东风放纸鸢。'] },
+  { title:'咏柳', author:'贺知章', dynasty:'唐', grade:'二年级', term:'下册',
+    lines:['碧玉妆成一树高，','万条垂下绿丝绦。','不知细叶谁裁出，','二月春风似剪刀。'] },
+  { title:'晓出净慈寺送林子方', author:'杨万里', dynasty:'宋', grade:'二年级', term:'下册',
+    lines:['毕竟西湖六月中，','风光不与四时同。','接天莲叶无穷碧，','映日荷花别样红。'] },
+  { title:'绝句（两个黄鹂鸣翠柳）', author:'杜甫', dynasty:'唐', grade:'二年级', term:'下册',
+    lines:['两个黄鹂鸣翠柳，','一行白鹭上青天。','窗含西岭千秋雪，','门泊东吴万里船。'] },
+
+  { title:'山行', author:'杜牧', dynasty:'唐', grade:'三年级', term:'上册',
+    lines:['远上寒山石径斜，','白云生处有人家。','停车坐爱枫林晚，','霜叶红于二月花。'] },
+  { title:'赠刘景文', author:'苏轼', dynasty:'宋', grade:'三年级', term:'上册',
+    lines:['荷尽已无擎雨盖，','菊残犹有傲霜枝。','一年好景君须记，','最是橙黄橘绿时。'] },
+  { title:'夜书所见', author:'叶绍翁', dynasty:'宋', grade:'三年级', term:'上册',
+    lines:['萧萧梧叶送寒声，','江上秋风动客情。','知有儿童挑促织，','夜深篱落一灯明。'] },
+  { title:'望天门山', author:'李白', dynasty:'唐', grade:'三年级', term:'上册',
+    lines:['天门中断楚江开，','碧水东流至此回。','两岸青山相对出，','孤帆一片日边来。'] },
+  { title:'饮湖上初晴后雨', author:'苏轼', dynasty:'宋', grade:'三年级', term:'上册',
+    lines:['水光潋滟晴方好，','山色空蒙雨亦奇。','欲把西湖比西子，','淡妆浓抹总相宜。'] },
+  { title:'望洞庭', author:'刘禹锡', dynasty:'唐', grade:'三年级', term:'上册',
+    lines:['湖光秋月两相和，','潭面无风镜未磨。','遥望洞庭山水翠，','白银盘里一青螺。'] },
+
+  { title:'绝句（迟日江山丽）', author:'杜甫', dynasty:'唐', grade:'三年级', term:'下册',
+    lines:['迟日江山丽，','春风花草香。','泥融飞燕子，','沙暖睡鸳鸯。'] },
+  { title:'惠崇春江晓景', author:'苏轼', dynasty:'宋', grade:'三年级', term:'下册',
+    lines:['竹外桃花三两枝，','春江水暖鸭先知。','蒌蒿满地芦芽短，','正是河豚欲上时。'] },
+  { title:'三衢道中', author:'曾几', dynasty:'宋', grade:'三年级', term:'下册',
+    lines:['梅子黄时日日晴，','小溪泛尽却山行。','绿阴不减来时路，','添得黄鹂四五声。'] },
+  { title:'元日', author:'王安石', dynasty:'宋', grade:'三年级', term:'下册',
+    lines:['爆竹声中一岁除，','春风送暖入屠苏。','千门万户曈曈日，','总把新桃换旧符。'] },
+  { title:'清明', author:'杜牧', dynasty:'唐', grade:'三年级', term:'下册',
+    lines:['清明时节雨纷纷，','路上行人欲断魂。','借问酒家何处有，','牧童遥指杏花村。'] },
+  { title:'九月九日忆山东兄弟', author:'王维', dynasty:'唐', grade:'三年级', term:'下册',
+    lines:['独在异乡为异客，','每逢佳节倍思亲。','遥知兄弟登高时，','遍插茱萸少一人。'] },
+];
+const GRADES = ['一年级','二年级','三年级'];
+
+/* ==================== 古诗列表 ==================== */
+let listSelectedGrades = new Set(GRADES);
+
+function buildListGradeChips(){
+  const box = $('listGradeChips');
+  box.innerHTML = '';
+  GRADES.forEach(g=>{
+    const chip = document.createElement('div');
+    chip.className = 'grade-chip' + (listSelectedGrades.has(g)?' selected':'');
+    chip.textContent = g;
+    chip.onclick = ()=>{
+      if(listSelectedGrades.has(g)) listSelectedGrades.delete(g); else listSelectedGrades.add(g);
+      if(listSelectedGrades.size===0) listSelectedGrades.add(g); // 至少保留一个
+      buildListGradeChips();
+      buildPoemList();
+    };
+    box.appendChild(chip);
+  });
+}
+
+function buildPoemList(){
+  const box = $('poemListBox');
+  box.innerHTML = '';
+  const filtered = POEMS.filter(p=>listSelectedGrades.has(p.grade));
+  if(filtered.length===0){
+    box.innerHTML = '<div class="empty-tip">这个年级还没有古诗哦～</div>';
+    return;
+  }
+  filtered.forEach(p=>{
+    const item = document.createElement('div');
+    item.className = 'poem-item';
+    item.innerHTML = `
+      <div class="pi-main">
+        <div class="pi-title">${p.title}</div>
+        <div class="pi-first">${p.author}（${p.dynasty}） · ${p.lines[0]}</div>
+      </div>
+      <div class="pi-grade">${p.grade}${p.term}</div>
+    `;
+    item.onclick = ()=> showDetail(p);
+    box.appendChild(item);
+  });
+}
+function showList(){
+  buildListGradeChips();
+  buildPoemList();
+  showScreen('screen-list');
+}
+
+/* ==================== 古诗详情 ==================== */
+function renderPoemCardHTML(p){
+  const linesHtml = p.lines.map(l=>`<div class="pc-line">${l}</div>`).join('');
+  return `
+    <div class="pc-title">${p.title}</div>
+    <div class="pc-author">〔${p.dynasty}〕${p.author}</div>
+    ${linesHtml}
+    <div class="poem-tag">${p.grade}${p.term}</div>
+  `;
+}
+function showDetail(p){
+  $('detailCard').innerHTML = renderPoemCardHTML(p);
+  currentSpeakText = p.title + '。' + p.author + '。' + p.lines.join('');
+  showScreen('screen-detail');
+}
+
+/* ==================== 抽背设置 ==================== */
+let reciteSelectedGrades = new Set(GRADES);
+let reciteCount = 10;
+
+function buildSetupGradeChips(){
+  const box = $('setupGradeChips');
+  box.innerHTML = '';
+  GRADES.forEach(g=>{
+    const chip = document.createElement('div');
+    chip.className = 'grade-chip' + (reciteSelectedGrades.has(g)?' selected':'');
+    chip.textContent = g;
+    chip.onclick = ()=>{
+      if(reciteSelectedGrades.has(g)) reciteSelectedGrades.delete(g); else reciteSelectedGrades.add(g);
+      buildSetupGradeChips();
+    };
+    box.appendChild(chip);
+  });
+}
+function buildSetupCountChips(){
+  const box = $('setupCountChips');
+  box.innerHTML = '';
+  [5,10,'全部'].forEach(c=>{
+    const chip = document.createElement('div');
+    chip.className = 'grade-chip' + (reciteCount===c?' selected':'');
+    chip.textContent = c==='全部' ? '全部' : c+'首';
+    chip.onclick = ()=>{ reciteCount=c; buildSetupCountChips(); };
+    box.appendChild(chip);
+  });
+}
+function showReciteSetup(){
+  buildSetupGradeChips();
+  buildSetupCountChips();
+  showScreen('screen-recite-setup');
+}
+
+function shuffleArr(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* ==================== 抽背逻辑 ==================== */
+let recite = { pool:[], idx:0, okCount:0, redoList:[], revealed:false };
+
+function startRecite(){
+  if(reciteSelectedGrades.size===0){
+    alert('请至少选择一个年级哦～');
+    return;
+  }
+  const pool = shuffleArr(POEMS.filter(p=>reciteSelectedGrades.has(p.grade)).slice());
+  if(pool.length===0){
+    alert('请至少选择一个年级哦～');
+    return;
+  }
+  const count = reciteCount==='全部' ? pool.length : Math.min(reciteCount, pool.length);
+  recite = { pool: pool.slice(0, count), idx:0, okCount:0, redoList:[], revealed:false };
+  showScreen('screen-recite-quiz');
+  renderRecite();
+}
+
+function renderRecite(){
+  const p = recite.pool[recite.idx];
+  $('reciteProgressText').textContent = `第 ${recite.idx+1}/${recite.pool.length} 题`;
+  $('reciteScoreText').textContent = `背出 ${recite.okCount} 首`;
+  $('reciteProgressFill').style.width = (recite.idx/recite.pool.length*100)+'%';
+  recite.revealed = false;
+
+  $('reciteCard').innerHTML = `
+    <div class="pc-title">${p.title}</div>
+    <div class="pc-author">〔${p.dynasty}〕${p.author}</div>
+    <div class="reveal-hint">🙈 先自己背一背，想好了再点击揭晓～</div>
+    <div class="poem-tag">${p.grade}${p.term}</div>
+  `;
+  currentSpeakText = '';
+
+  const row = $('reciteActionRow');
+  row.innerHTML = '';
+  const revealBtn = document.createElement('button');
+  revealBtn.className = 'big-btn btn-orange';
+  revealBtn.textContent = '📖 揭晓古诗';
+  revealBtn.onclick = ()=> revealRecite(p);
+  row.appendChild(revealBtn);
+}
+
+function revealRecite(p){
+  recite.revealed = true;
+  $('reciteCard').innerHTML = renderPoemCardHTML(p);
+  currentSpeakText = p.title + '。' + p.author + '。' + p.lines.join('');
+
+  const row = $('reciteActionRow');
+  row.innerHTML = '';
+  const okBtn = document.createElement('button');
+  okBtn.className = 'big-btn btn-green';
+  okBtn.textContent = '✅ 我背出来了';
+  okBtn.onclick = ()=> judgeRecite(true, p);
+
+  const noBtn = document.createElement('button');
+  noBtn.className = 'big-btn btn-pink';
+  noBtn.textContent = '💪 还需要多练';
+  noBtn.onclick = ()=> judgeRecite(false, p);
+
+  row.appendChild(okBtn);
+  row.appendChild(noBtn);
+}
+
+function judgeRecite(isOk, p){
+  if(isOk) recite.okCount++;
+  else recite.redoList.push(p);
+
+  recite.idx++;
+  if(recite.idx >= recite.pool.length){
+    finishRecite();
+  } else {
+    renderRecite();
+  }
+}
+
+function finishRecite(){
+  const total = recite.pool.length;
+  const rate = Math.round(recite.okCount/total*100);
+
+  const msgs = rate>=90
+    ? ['太厉害啦！小小背诗小天才！🌟','完美通关，继续保持！👍']
+    : rate>=60
+    ? ['很不错哦！再练一练就更棒啦！💪','进步真快，继续加油！😊']
+    : ['没关系，多读几遍就能记住！🌱','慢慢来，你一定可以的！🐢'];
+  $('reciteResultMsg').textContent = msgs[Math.floor(Math.random()*msgs.length)];
+  $('reciteResultMascot').textContent = rate>=90 ? '🏆' : (rate>=60 ? '🎉' : '🌱');
+
+  $('reciteStatOk').textContent = recite.okCount;
+  $('reciteStatTotal').textContent = total;
+  $('reciteStatRate').textContent = rate+'%';
+
+  const box = $('reciteRedoBox');
+  box.innerHTML = '';
+  if(recite.redoList.length>0){
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = '📝 这些古诗要再练练：';
+    box.appendChild(label);
+    const listWrap = document.createElement('div');
+    listWrap.className = 'redo-list';
+    recite.redoList.forEach(p=>{
+      const item = document.createElement('div');
+      item.className = 'redo-item';
+      item.innerHTML = `<span>${p.title}</span><span>${p.author}</span>`;
+      listWrap.appendChild(item);
+    });
+    box.appendChild(listWrap);
+  }
+
+  showScreen('screen-recite-result');
+}
+</script>
+</body>
+</html>

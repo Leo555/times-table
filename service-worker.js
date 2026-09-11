@@ -1,7 +1,8 @@
-const CACHE_NAME = 'times-table-v2';
+const CACHE_NAME = 'times-table-v3';
 const APP_SHELL = [
   './',
   './index.html',
+  './poetry.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
