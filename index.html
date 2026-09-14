@@ -249,6 +249,15 @@
   .num-grid{
     display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:6px;
   }
+  .setup-hint{
+    display:none;
+    align-items:center; gap:8px;
+    background:#fff6da; border:2px dashed var(--yellow);
+    color:#8a6d1a; font-weight:700; font-size:14px;
+    border-radius:12px; padding:10px 14px; margin:2px 0 14px;
+    animation:fadeIn .3s ease;
+  }
+  .setup-hint.show{ display:flex; }
   .num-chip{
     padding:14px 0; text-align:center; border-radius:14px;
     font-size:18px; font-weight:800; cursor:pointer;
@@ -535,6 +544,7 @@
     <div class="card">
       <div class="section-label">1️⃣ 选择要练习的乘法表（可多选）</div>
       <div class="num-grid" id="numGrid"></div>
+      <div class="setup-hint" id="setupHint">💡 当前选择太简单啦，给自己增加点难度吧！</div>
       <div style="text-align:right; margin-bottom:14px;">
         <span class="btn-small big-btn btn-purple" style="display:inline-block; width:auto;" onclick="toggleAllNums()">全选/取消</span>
       </div>
@@ -713,6 +723,9 @@ function buildSetup(){
     };
     grid.appendChild(chip);
   }
+  // 太简单提示：只选了 1、2 的口诀（或其子集）时提醒增加难度
+  const isTooEasy = selectedNums.size>0 && Array.from(selectedNums).every(n=>n<=2);
+  $('setupHint').classList.toggle('show', isTooEasy);
   // 题量选择
   const countRow = $('countRow');
   countRow.innerHTML = '';
