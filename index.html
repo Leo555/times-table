@@ -258,6 +258,10 @@
     animation:fadeIn .3s ease;
   }
   .setup-hint.show{ display:flex; }
+  .big-btn.disabled{
+    opacity:.45; cursor:not-allowed; filter:grayscale(.3);
+    box-shadow:none; transform:none !important;
+  }
   .num-chip{
     padding:14px 0; text-align:center; border-radius:14px;
     font-size:18px; font-weight:800; cursor:pointer;
@@ -555,7 +559,7 @@
       <div class="section-label">3️⃣ 答题方式</div>
       <div class="choice-row" id="modeRow"></div>
     </div>
-    <button class="big-btn btn-orange" onclick="startQuiz()">🚀 开始挑战！</button>
+    <button class="big-btn btn-orange" id="startQuizBtn" onclick="startQuiz()">🚀 开始挑战！</button>
   </div>
 
   <!-- 答题界面 -->
@@ -708,6 +712,10 @@ let selectedNums = new Set([1,2,3,4,5,6,7,8,9]);
 let selectedCount = 10;
 let selectedMode = 'choice'; // choice | speak
 
+function isSelectionTooEasy(){
+  return selectedNums.size>0 && Array.from(selectedNums).every(n=>n<=2);
+}
+
 function buildSetup(){
   // 数字选择
   const grid = $('numGrid');
@@ -723,9 +731,12 @@ function buildSetup(){
     };
     grid.appendChild(chip);
   }
-  // 太简单提示：只选了 1、2 的口诀（或其子集）时提醒增加难度
-  const isTooEasy = selectedNums.size>0 && Array.from(selectedNums).every(n=>n<=2);
+  // 太简单提示：只选了 1、2 的口诀（或其子集）时提醒增加难度，并禁止直接开始挑战
+  const isTooEasy = isSelectionTooEasy();
   $('setupHint').classList.toggle('show', isTooEasy);
+  const startBtn = $('startQuizBtn');
+  startBtn.disabled = isTooEasy;
+  startBtn.classList.toggle('disabled', isTooEasy);
   // 题量选择
   const countRow = $('countRow');
   countRow.innerHTML = '';
@@ -793,6 +804,10 @@ function shuffleArr(arr){
 function startQuiz(){
   if(selectedNums.size===0){
     alert('请至少选择一个乘法表哦～');
+    return;
+  }
+  if(isSelectionTooEasy()){
+    alert('当前选择太简单啦，请再多选一些乘法表增加难度吧～');
     return;
   }
   ensureAudio();
